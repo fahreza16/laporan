@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Aktivitas Pengiriman & Biaya Perjalanan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background: #1a2a3a;
+            color: #fff;
+            padding: 20px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+        .sidebar h2 {
+            text-align: center;
+            font-size: 16px;
+            padding: 0 15px 20px;
+            border-bottom: 1px solid #2a3a4a;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .sidebar nav a {
+            display: block;
+            padding: 14px 20px;
+            color: #b0c4d8;
+            text-decoration: none;
+            font-size: 15px;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .sidebar nav a:hover,
+        .sidebar nav a.active {
+            background: #243548;
+            color: #fff;
+            border-left-color: #4caf50;
+        }
+        .sidebar nav a .icon {
+            margin-right: 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 220px;
+            flex: 1;
+            padding: 25px 30px;
+            min-height: 100vh;
+        }
+
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #1a2a3a;
+            margin-bottom: 25px;
+        }
+
+        /* Cards / Panels */
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .card h3 {
+            font-size: 18px;
+            color: #1a2a3a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eef2f7;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .form-group label .optional {
+            font-weight: 400;
+            color: #999;
+            font-size: 12px;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.2s;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76,175,80,0.1);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+        .form-group .input-rupiah {
+            position: relative;
+        }
+        .form-group .input-rupiah .prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-weight: 600;
+            font-size: 14px;
+            pointer-events: none;
+        }
+        .form-group .input-rupiah input {
+            padding-left: 38px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #4caf50;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #43a047;
+        }
+        .btn-danger {
+            background: #e53935;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #c62828;
+        }
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #d0d5dd;
+        }
+        .btn-secondary:hover {
+            background: #e8e8e8;
+        }
+        .btn-small {
+            padding: 6px 14px;
+            font-size: 12px;
+        }
+
+        /* Photo Upload */
+        .photo-upload-area {
+            border: 2px dashed #d0d5dd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fafbfc;
+        }
+        .photo-upload-area:hover {
+            border-color: #4caf50;
+            background: #f0faf0;
+        }
+        .photo-upload-area .icon {
+            font-size: 40px;
+            color: #b0b8c4;
+        }
+        .photo-upload-area p {
+            color: #666;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        /* Photo Preview */
+        .photo-previews {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .photo-preview-item {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        .photo-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-preview-item .remove-photo {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 22px;
+            height: 22px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        table th {
+            background: #f5f7fa;
+            color: #333;
+            font-weight: 600;
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 2px solid #e0e4e8;
+            white-space: nowrap;
+        }
+        table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #eef2f7;
+            vertical-align: middle;
+        }
+        table tr:hover {
+            background: #f8fafc;
+        }
+        table .rupiah-cell {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        table .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        table .badge-pemasukan {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        table .badge-pengeluaran {
+            background: #fbe9e7;
+            color: #c62828;
+        }
+        table .photo-thumb {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Filter */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .filter-bar .form-group {
+            margin-bottom: 0;
+            flex: 1;
+            min-width: 150px;
+        }
+        .filter-bar .form-group label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Kas Info */
+        .kas-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+        .kas-info-item {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 20px;
+            text-align: center;
+        }
+        .kas-info-item .label {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        .kas-info-item .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a2a3a;
+        }
+        .kas-info-item .value.green {
+            color: #2e7d32;
+        }
+        .kas-info-item .value.red {
+            color: #c62828;
+        }
+
+        /* Action buttons row */
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        /* Saldo berjalan row */
+        .saldo-row {
+            background: #e8f5e9 !important;
+            font-weight: 600;
+        }
+        .saldo-row td {
+            border-top: 2px solid #4caf50;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 10px;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            padding: 20px;
+        }
+        .modal-content img {
+            max-width: 100%;
+            max-height: 70vh;
+            display: block;
+            margin: 0 auto;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+            background: none;
+            border: none;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #333;
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast.success {
+            background: #2e7d32;
+        }
+        .toast.error {
+            background: #c62828;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+        .empty-state .icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 250px;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .kas-info {
+                grid-template-columns: 1fr;
+            }
+            .hamburger {
+                display: block !important;
+            }
+        }
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #1a2a3a;
+            margin-bottom: 15px;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 99;
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* Photo gallery in laporan */
+        .photo-gallery-cell {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .photo-gallery-cell .photo-thumb {
+            width: 45px;
+            height: 45px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<aside class="sidebar" id="sidebar">
+    <h2>📦 Laporan Aktivitas Pengiriman & Biaya Perjalanan</h2>
+    <nav>
+        <a class="active" data-tab="tabKas"><span class="icon">💰</span> Kas Masuk</a>
+        <a data-tab="tabAktivitas"><span class="icon">📋</span> Aktivitas</a>
+        <a data-tab="tabLaporan"><span class="icon">📊</span> Laporan</a>
+    </nav>
+</aside>
+
+<div class="main-content">
+    <button class="hamburger" id="hamburgerBtn">☰</button>
+
+    <!-- ===== TAB KAS ===== -->
+    <div class="tab-content active" id="tabKas">
+        <h1>💰 Kas Masuk</h1>
+
+        <div class="kas-info">
+            <div class="kas-info-item">
+                <div class="label">Total Kas Masuk</div>
+                <div class="value green" id="totalKasMasuk">Rp 0</div>
+            </div>
+            <div class="kas-info-item">
+                <div class="label">Total Biaya</div>
+                <div class="value red" id="totalBiaya">Rp 0</div>
+            </div>
+            <div class="kas-info-item">
+                <div class="label">Kas Terkini</div>
+                <div class="value" id="kasTerkini">Rp 0</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Tambah Kas Masuk</h3>
+            <form id="formKas">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tanggal Kas Masuk</label>
+                        <input type="date" id="kasTanggal" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah Kas Masuk</label>
+                        <div class="input-rupiah">
+                            <span class="prefix">Rp</span>
+                            <input type="text" id="kasJumlah" placeholder="0" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi / Sumber</label>
+                    <input type="text" id="kasDeskripsi" placeholder="Misal: Pembayaran pelanggan A" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan Kas Masuk</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Riwayat Kas Masuk</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Deskripsi</th>
+                            <th style="text-align:right">Jumlah</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="riwayatKasBody"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="emptyKas">
+                <div class="icon">💰</div>
+                <p>Belum ada data kas masuk</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TAB AKTIVITAS ===== -->
+    <div class="tab-content" id="tabAktivitas">
+        <h1>📋 Aktivitas Pengiriman / Perjalanan</h1>
+
+        <div class="card">
+            <h3>Tambah Aktivitas</h3>
+            <form id="formAktivitas">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tanggal Aktivitas</label>
+                        <input type="date" id="aktivitasTanggal" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Biaya</label>
+                        <div class="input-rupiah">
+                            <span class="prefix">Rp</span>
+                            <input type="text" id="aktivitasBiaya" placeholder="0" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi Aktivitas</label>
+                    <input type="text" id="aktivitasDeskripsi" placeholder="Misal: Pengiriman barang Jakarta - Bandung" required>
+                </div>
+                <div class="form-group">
+                    <label>Keterangan <span class="optional">(opsional - isi jika ada kendala)</span></label>
+                    <textarea id="aktivitasKeterangan" placeholder="Kendala / catatan tambahan..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Upload Foto Bukti</label>
+                    <div class="photo-upload-area" id="photoUploadArea">
+                        <div class="icon">📷</div>
+                        <p>Klik di sini untuk upload foto (bisa lebih dari 1)</p>
+                        <input type="file" id="photoInput" accept="image/*" multiple style="display:none">
+                    </div>
+                    <div class="photo-previews" id="photoPreviews"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan Aktivitas</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Riwayat Aktivitas</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Deskripsi</th>
+                            <th style="text-align:right">Biaya</th>
+                            <th>Keterangan</th>
+                            <th>Foto</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="riwayatAktivitasBody"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="emptyAktivitas">
+                <div class="icon">📋</div>
+                <p>Belum ada data aktivitas</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TAB LAPORAN ===== -->
+    <div class="tab-content" id="tabLaporan">
+        <h1>📊 Laporan Keuangan</h1>
+
+        <div class="kas-info">
+            <div class="kas-info-item">
+                <div class="label">Total Kas Masuk (Filter)</div>
+                <div class="value green" id="laporanTotalKasMasuk">Rp 0</div>
+            </div>
+            <div class="kas-info-item">
+                <div class="label">Total Biaya (Filter)</div>
+                <div class="value red" id="laporanTotalBiaya">Rp 0</div>
+            </div>
+            <div class="kas-info-item">
+                <div class="label">Saldo Akhir (Filter)</div>
+                <div class="value" id="laporanSaldoAkhir">Rp 0</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Filter Laporan</h3>
+            <div class="filter-bar">
+                <div class="form-group">
+                    <label>Dari Tanggal</label>
+                    <input type="date" id="filterTanggalAwal">
+                </div>
+                <div class="form-group">
+                    <label>Sampai Tanggal</label>
+                    <input type="date" id="filterTanggalAkhir">
+                </div>
+                <div class="form-group" style="flex:0 0 auto; min-width:auto">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" id="btnFilter">Terapkan Filter</button>
+                </div>
+                <div class="form-group" style="flex:0 0 auto; min-width:auto">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-secondary" id="btnResetFilter">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn btn-primary" id="btnExportExcel">📥 Export ke Excel (CSV)</button>
+            <button class="btn btn-secondary" id="btnExportSemua">📥 Export Semua Data</button>
+        </div>
+
+        <div class="card">
+            <h3>Laporan Detail</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Jenis</th>
+                            <th>Deskripsi</th>
+                            <th style="text-align:right">Kas Masuk</th>
+                            <th style="text-align:right">Biaya</th>
+                            <th>Keterangan</th>
+                            <th>Foto</th>
+                            <th style="text-align:right">Saldo Berjalan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="laporanBody"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="emptyLaporan">
+                <div class="icon">📊</div>
+                <p>Belum ada data untuk ditampilkan</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Foto -->
+<div class="modal-overlay" id="photoModal">
+    <div class="modal-content">
+        <button class="modal-close" id="photoModalClose">&times;</button>
+        <img id="photoModalImg" src="" alt="Foto">
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+    // ============================
+    // DATA STORE
+    // ============================
+    const STORAGE_KEY = 'laporanAktivitasData';
+
+    function getData() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            return raw ? JSON.parse(raw) : { kas: [], aktivitas: [] };
+        } catch {
+            return { kas: [], aktivitas: [] };
+        }
+    }
+
+    function saveData(data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    // ============================
+    // RUPIAH FORMATTER
+    // ============================
+    function formatRupiah(amount) {
+        const num = parseInt(amount) || 0;
+        return 'Rp ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function parseRupiah(str) {
+        if (!str) return 0;
+        return parseInt(str.replace(/[^0-9]/g, '')) || 0;
+    }
+
+    function formatInputRupiah(input) {
+        let val = input.value.replace(/[^0-9]/g, '');
+        if (val) {
+            input.value = val.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        } else {
+            input.value = '';
+        }
+    }
+
+    // ============================
+    // TOAST
+    // ============================
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast ' + type + ' show';
+        setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    // ============================
+    // TAB NAVIGATION
+    // ============================
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.sidebar nav a').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        document.querySelector(`.sidebar nav a[data-tab="${tabId}"]`).classList.add('active');
+        // Close sidebar on mobile
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+
+        if (tabId === 'tabLaporan') renderLaporan();
+    }
+
+    document.querySelectorAll('.sidebar nav a').forEach(a => {
+        a.addEventListener('click', () => switchTab(a.dataset.tab));
+    });
+
+    // Hamburger
+    document.getElementById('hamburgerBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+    });
+    document.getElementById('sidebarOverlay').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+    });
+
+    // ============================
+    // PHOTO UPLOAD
+    // ============================
+    let uploadedPhotos = []; // array of { name, dataUrl }
+
+    document.getElementById('photoUploadArea').addEventListener('click', () => {
+        document.getElementById('photoInput').click();
+    });
+
+    document.getElementById('photoInput').addEventListener('change', (e) => {
+        const files = e.target.files;
+        if (!files.length) return;
+
+        Array.from(files).forEach(file => {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                uploadedPhotos.push({
+                    name: file.name,
+                    dataUrl: ev.target.result
+                });
+                renderPhotoPreviews();
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Reset input so same file can be uploaded again
+        e.target.value = '';
+    });
+
+    function renderPhotoPreviews() {
+        const container = document.getElementById('photoPreviews');
+        if (uploadedPhotos.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+        container.innerHTML = uploadedPhotos.map((photo, idx) => `
+            <div class="photo-preview-item">
+                <img src="${photo.dataUrl}" alt="${photo.name}">
+                <button class="remove-photo" data-index="${idx}">&times;</button>
+            </div>
+        `).join('');
+
+        container.querySelectorAll('.remove-photo').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.index);
+                uploadedPhotos.splice(idx, 1);
+                renderPhotoPreviews();
+            });
+        });
+    }
+
+    // ============================
+    // FORM KAS
+    // ============================
+    document.getElementById('kasJumlah').addEventListener('input', function() {
+        formatInputRupiah(this);
+    });
+
+    document.getElementById('formKas').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = getData();
+        const entry = {
+            id: Date.now() + '_kas_' + Math.random().toString(36).substr(2, 5),
+            tanggal: document.getElementById('kasTanggal').value,
+            jumlah: parseRupiah(document.getElementById('kasJumlah').value),
+            deskripsi: document.getElementById('kasDeskripsi').value.trim(),
+            tipe: 'kas'
+        };
+
+        if (!entry.tanggal || !entry.jumlah || !entry.deskripsi) {
+            showToast('Mohon isi semua field yang wajib', 'error');
+            return;
+        }
+
+        data.kas.push(entry);
+        saveData(data);
+        document.getElementById('formKas').reset();
+        renderKasInfo();
+        renderRiwayatKas();
+        showToast('Kas masuk berhasil disimpan!');
+    });
+
+    // ============================
+    // FORM AKTIVITAS
+    // ============================
+    document.getElementById('aktivitasBiaya').addEventListener('input', function() {
+        formatInputRupiah(this);
+    });
+
+    document.getElementById('formAktivitas').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = getData();
+        const entry = {
+            id: Date.now() + '_akt_' + Math.random().toString(36).substr(2, 5),
+            tanggal: document.getElementById('aktivitasTanggal').value,
+            deskripsi: document.getElementById('aktivitasDeskripsi').value.trim(),
+            biaya: parseRupiah(document.getElementById('aktivitasBiaya').value),
+            keterangan: document.getElementById('aktivitasKeterangan').value.trim(),
+            foto: [...uploadedPhotos],
+            tipe: 'aktivitas'
+        };
+
+        if (!entry.tanggal || !entry.deskripsi || !entry.biaya) {
+            showToast('Mohon isi tanggal, deskripsi, dan biaya', 'error');
+            return;
+        }
+
+        data.aktivitas.push(entry);
+        saveData(data);
+        document.getElementById('formAktivitas').reset();
+        uploadedPhotos = [];
+        renderPhotoPreviews();
+        renderKasInfo();
+        renderRiwayatAktivitas();
+        showToast('Aktivitas berhasil disimpan!');
+    });
+
+    // ============================
+    // RENDER KAS INFO
+    // ============================
+    function renderKasInfo() {
+        const data = getData();
+        const totalMasuk = data.kas.reduce((sum, k) => sum + k.jumlah, 0);
+        const totalBiaya = data.aktivitas.reduce((sum, a) => sum + a.biaya, 0);
+        const saldo = totalMasuk - totalBiaya;
+
+        document.getElementById('totalKasMasuk').textContent = formatRupiah(totalMasuk);
+        document.getElementById('totalBiaya').textContent = formatRupiah(totalBiaya);
+        document.getElementById('kasTerkini').textContent = formatRupiah(saldo);
+        document.getElementById('kasTerkini').style.color = saldo >= 0 ? '#2e7d32' : '#c62828';
+    }
+
+    // ============================
+    // RENDER RIWAYAT KAS
+    // ============================
+    function renderRiwayatKas() {
+        const data = getData();
+        const tbody = document.getElementById('riwayatKasBody');
+        const empty = document.getElementById('emptyKas');
+
+        if (data.kas.length === 0) {
+            tbody.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+
+        const sorted = [...data.kas].sort((a, b) => b.tanggal.localeCompare(a.tanggal) || b.id.toString().localeCompare(a.id.toString()));
+
+        tbody.innerHTML = sorted.map(item => `
+            <tr>
+                <td>${formatTanggal(item.tanggal)}</td>
+                <td>${escapeHtml(item.deskripsi)}</td>
+                <td class="rupiah-cell">${formatRupiah(item.jumlah)}</td>
+                <td>
+                    <button class="btn btn-danger btn-small" onclick="hapusKas('${item.id}')">Hapus</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function hapusKas(id) {
+        if (!confirm('Hapus data kas masuk ini?')) return;
+        const data = getData();
+        data.kas = data.kas.filter(k => k.id !== id);
+        saveData(data);
+        renderKasInfo();
+        renderRiwayatKas();
+        showToast('Data kas berhasil dihapus');
+    }
+
+    // ============================
+    // RENDER RIWAYAT AKTIVITAS
+    // ============================
+    function renderRiwayatAktivitas() {
+        const data = getData();
+        const tbody = document.getElementById('riwayatAktivitasBody');
+        const empty = document.getElementById('emptyAktivitas');
+
+        if (data.aktivitas.length === 0) {
+            tbody.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+
+        const sorted = [...data.aktivitas].sort((a, b) => b.tanggal.localeCompare(a.tanggal) || b.id.toString().localeCompare(a.id.toString()));
+
+        tbody.innerHTML = sorted.map(item => `
+            <tr>
+                <td>${formatTanggal(item.tanggal)}</td>
+                <td>${escapeHtml(item.deskripsi)}</td>
+                <td class="rupiah-cell">${formatRupiah(item.biaya)}</td>
+                <td>${item.keterangan ? escapeHtml(item.keterangan) : '<span style="color:#999">-</span>'}</td>
+                <td>
+                    ${item.foto && item.foto.length > 0 ? `
+                        <div class="photo-gallery-cell">
+                            ${item.foto.map(f => `<img class="photo-thumb" src="${f.dataUrl}" alt="${escapeHtml(f.name)}" onclick="openPhotoModal('${f.dataUrl}')">`).join('')}
+                        </div>
+                    ` : '<span style="color:#999">-</span>'}
+                </td>
+                <td>
+                    <button class="btn btn-danger btn-small" onclick="hapusAktivitas('${item.id}')">Hapus</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function hapusAktivitas(id) {
+        if (!confirm('Hapus data aktivitas ini?')) return;
+        const data = getData();
+        data.aktivitas = data.aktivitas.filter(a => a.id !== id);
+        saveData(data);
+        renderKasInfo();
+        renderRiwayatAktivitas();
+        showToast('Data aktivitas berhasil dihapus');
+    }
+
+    // ============================
+    // PHOTO MODAL
+    // ============================
+    function openPhotoModal(dataUrl) {
+        document.getElementById('photoModalImg').src = dataUrl;
+        document.getElementById('photoModal').classList.add('active');
+    }
+
+    document.getElementById('photoModalClose').addEventListener('click', () => {
+        document.getElementById('photoModal').classList.remove('active');
+    });
+    document.getElementById('photoModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            document.getElementById('photoModal').classList.remove('active');
+        }
+    });
+
+    // ============================
+    // FORMAT TANGGAL
+    // ============================
+    function formatTanggal(tgl) {
+        if (!tgl) return '-';
+        const parts = tgl.split('-');
+        if (parts.length !== 3) return tgl;
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        return `${parseInt(parts[2])} ${months[parseInt(parts[1])-1]} ${parts[0]}`;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ============================
+    // LAPORAN
+    // ============================
+    let laporanFilter = { awal: '', akhir: '' };
+
+    document.getElementById('btnFilter').addEventListener('click', () => {
+        laporanFilter.awal = document.getElementById('filterTanggalAwal').value;
+        laporanFilter.akhir = document.getElementById('filterTanggalAkhir').value;
+        renderLaporan();
+    });
+
+    document.getElementById('btnResetFilter').addEventListener('click', () => {
+        document.getElementById('filterTanggalAwal').value = '';
+        document.getElementById('filterTanggalAkhir').value = '';
+        laporanFilter = { awal: '', akhir: '' };
+        renderLaporan();
+    });
+
+    function renderLaporan() {
+        const data = getData();
+        const entries = [];
+
+        // Add kas entries
+        data.kas.forEach(k => {
+            entries.push({
+                tanggal: k.tanggal,
+                jenis: 'Kas Masuk',
+                deskripsi: k.deskripsi,
+                kasMasuk: k.jumlah,
+                biaya: 0,
+                keterangan: '',
+                foto: [],
+                sortKey: k.tanggal + '_0_' + k.id,
+                tipe: 'kas',
+                id: k.id
+            });
+        });
+
+        // Add aktivitas entries
+        data.aktivitas.forEach(a => {
+            entries.push({
+                tanggal: a.tanggal,
+                jenis: 'Biaya Aktivitas',
+                deskripsi: a.deskripsi,
+                kasMasuk: 0,
+                biaya: a.biaya,
+                keterangan: a.keterangan || '',
+                foto: a.foto || [],
+                sortKey: a.tanggal + '_1_' + a.id,
+                tipe: 'aktivitas',
+                id: a.id
+            });
+        });
+
+        // Filter by date
+        let filtered = entries;
+        if (laporanFilter.awal) {
+            filtered = filtered.filter(e => e.tanggal >= laporanFilter.awal);
+        }
+        if (laporanFilter.akhir) {
+            filtered = filtered.filter(e => e.tanggal <= laporanFilter.akhir);
+        }
+
+        // Sort by date asc then type
+        filtered.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+
+        const tbody = document.getElementById('laporanBody');
+        const empty = document.getElementById('emptyLaporan');
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '';
+            empty.style.display = 'block';
+            document.getElementById('laporanTotalKasMasuk').textContent = 'Rp 0';
+            document.getElementById('laporanTotalBiaya').textContent = 'Rp 0';
+            document.getElementById('laporanSaldoAkhir').textContent = 'Rp 0';
+            return;
+        }
+        empty.style.display = 'none';
+
+        let runningSaldo = 0;
+
+        // Calculate starting saldo (kas before filter minus aktivitas before filter)
+        // For accurate running balance, we need to consider all entries before the earliest date in filter
+        if (laporanFilter.awal) {
+            const allEntries = [];
+            data.kas.forEach(k => {
+                allEntries.push({ tanggal: k.tanggal, kasMasuk: k.jumlah, biaya: 0, sortKey: k.tanggal + '_0_' + k.id });
+            });
+            data.aktivitas.forEach(a => {
+                allEntries.push({ tanggal: a.tanggal, kasMasuk: 0, biaya: a.biaya, sortKey: a.tanggal + '_1_' + a.id });
+            });
+            allEntries.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+            allEntries.forEach(e => {
+                if (e.tanggal < laporanFilter.awal) {
+                    runningSaldo += e.kasMasuk - e.biaya;
+                }
+            });
+        }
+
+        const totalKasMasuk = filtered.reduce((s, e) => s + e.kasMasuk, 0);
+        const totalBiaya = filtered.reduce((s, e) => s + e.biaya, 0);
+
+        document.getElementById('laporanTotalKasMasuk').textContent = formatRupiah(totalKasMasuk);
+        document.getElementById('laporanTotalBiaya').textContent = formatRupiah(totalBiaya);
+        document.getElementById('laporanSaldoAkhir').textContent = formatRupiah(runningSaldo + totalKasMasuk - totalBiaya);
+        document.getElementById('laporanSaldoAkhir').style.color = (runningSaldo + totalKasMasuk - totalBiaya) >= 0 ? '#2e7d32' : '#c62828';
+
+        tbody.innerHTML = filtered.map(e => {
+            runningSaldo += e.kasMasuk - e.biaya;
+            const badgeClass = e.tipe === 'kas' ? 'badge-pemasukan' : 'badge-pengeluaran';
+            return `
+                <tr>
+                    <td>${formatTanggal(e.tanggal)}</td>
+                    <td><span class="badge ${badgeClass}">${e.jenis}</span></td>
+                    <td>${escapeHtml(e.deskripsi)}</td>
+                    <td class="rupiah-cell">${e.kasMasuk > 0 ? formatRupiah(e.kasMasuk) : '-'}</td>
+                    <td class="rupiah-cell">${e.biaya > 0 ? formatRupiah(e.biaya) : '-'}</td>
+                    <td>${e.keterangan ? escapeHtml(e.keterangan) : '<span style="color:#999">-</span>'}</td>
+                    <td>
+                        ${e.foto && e.foto.length > 0 ? `
+                            <div class="photo-gallery-cell">
+                                ${e.foto.map(f => `<img class="photo-thumb" src="${f.dataUrl}" alt="foto" onclick="openPhotoModal('${f.dataUrl}')">`).join('')}
+                            </div>
+                        ` : '<span style="color:#999">-</span>'}
+                    </td>
+                    <td class="rupiah-cell" style="font-weight:600">${formatRupiah(runningSaldo)}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // ============================
+    // EXPORT
+    // ============================
+    function escapeCsv(str) {
+        if (!str) return '';
+        // Escape quotes and wrap in quotes if contains comma, newline, or quote
+        if (str.includes(',') || str.includes('\n') || str.includes('"')) {
+            return '"' + str.replace(/"/g, '""') + '"';
+        }
+        return str;
+    }
+
+    function exportToCSV(semua = false) {
+        const data = getData();
+        const entries = [];
+
+        data.kas.forEach(k => {
+            entries.push({
+                tanggal: k.tanggal,
+                jenis: 'Kas Masuk',
+                deskripsi: k.deskripsi,
+                kasMasuk: k.jumlah,
+                biaya: 0,
+                keterangan: '',
+                fotoCount: 0
+            });
+        });
+
+        data.aktivitas.forEach(a => {
+            entries.push({
+                tanggal: a.tanggal,
+                jenis: 'Biaya Aktivitas',
+                deskripsi: a.deskripsi,
+                kasMasuk: 0,
+                biaya: a.biaya,
+                keterangan: a.keterangan || '',
+                fotoCount: (a.foto || []).length
+            });
+        });
+
+        // Apply filter if not "semua"
+        if (!semua && (laporanFilter.awal || laporanFilter.akhir)) {
+            const filtered = [];
+            entries.forEach(e => {
+                if (laporanFilter.awal && e.tanggal < laporanFilter.awal) return;
+                if (laporanFilter.akhir && e.tanggal > laporanFilter.akhir) return;
+                filtered.push(e);
+            });
+            entries.length = 0;
+            entries.push(...filtered);
+        }
+
+        entries.sort((a, b) => a.tanggal.localeCompare(b.tanggal) || (a.jenis === 'Kas Masuk' ? 0 : 1));
+
+        // Build CSV
+        const headers = ['Tanggal', 'Jenis', 'Deskripsi', 'Kas Masuk (Rp)', 'Biaya (Rp)', 'Keterangan', 'Jumlah Foto'];
+        const rows = entries.map(e => [
+            e.tanggal,
+            e.jenis,
+            e.deskripsi,
+            e.kasMasuk || 0,
+            e.biaya || 0,
+            e.keterangan,
+            e.fotoCount
+        ].map(v => escapeCsv(v.toString())).join(','));
+
+        const totalMasuk = entries.reduce((s, e) => s + e.kasMasuk, 0);
+        const totalBiaya = entries.reduce((s, e) => s + e.biaya, 0);
+        const saldo = totalMasuk - totalBiaya;
+
+        // Add totals
+        rows.push('');
+        rows.push(['', '', 'TOTAL', totalMasuk, totalBiaya, '', ''].map(v => escapeCsv(v.toString())).join(','));
+        rows.push(['', '', 'SALDO AKHIR', '', '', '', saldo].map(v => escapeCsv(v.toString())).join(','));
+
+        const csvContent = headers.join(',') + '\n' + rows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        const dateStr = new Date().toISOString().slice(0, 10);
+        link.download = `laporan_aktivitas_${dateStr}.csv`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+
+        showToast('Data berhasil diexport!');
+    }
+
+    document.getElementById('btnExportExcel').addEventListener('click', () => exportToCSV(false));
+    document.getElementById('btnExportSemua').addEventListener('click', () => exportToCSV(true));
+
+    // ============================
+    // SET DEFAULT DATE
+    // ============================
+    function setDefaultDates() {
+        const today = new Date().toISOString().slice(0, 10);
+        document.getElementById('kasTanggal').value = today;
+        document.getElementById('aktivitasTanggal').value = today;
+    }
+
+    // ============================
+    // INIT
+    // ============================
+    setDefaultDates();
+    renderKasInfo();
+    renderRiwayatKas();
+    renderRiwayatAktivitas();
+</script>
+
+</body>
+</html>
